@@ -1,0 +1,437 @@
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(
+        135deg,
+        #02072F,
+        #08265C
+    );
+    font-family: "Sora", sans-serif;
+    color: #F4F6FA;
+    overflow-x: hidden;
+}
+
+.logo {
+    position: absolute;
+    top: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.logo img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+}
+
+.tagline {
+    position: absolute;
+    top: 108px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 10;
+}
+
+.tagline ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tagline li {
+    color: #8B96AD;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    margin-bottom: 3px;
+}
+
+.tagline li::before {
+    content: "•";
+    color: #FAC739;
+    margin-right: 6px;
+}
+
+.login {
+    width: min(380px, calc(100vw - 40px));
+    position: absolute;
+    top: 175px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 30px 35px;
+    background: rgba(2, 7, 47, 0.78);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(250, 199, 57, 0.20);
+    border-radius: 20px;
+    box-sizing: border-box;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.35),
+        0 0 30px rgba(250, 199, 57, 0.08);
+    z-index: 5;
+}
+
+.login h2 {
+    margin: 0 0 24px;
+    color: #FAC739;
+    font-size: 30px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: -0.5px;
+    text-shadow:
+        0 0 12px rgba(250, 199, 57, 0.18);
+}
+
+.login label {
+    display: block;
+    margin-bottom: 8px;
+    color: #F4F6FA;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.login input[type="email"],
+.login input[type="password"] {
+    width: 100%;
+    height: 46px;
+    padding: 0 15px;
+    box-sizing: border-box;
+    border: 1px solid rgba(139, 150, 173, 0.25);
+    border-radius: 10px;
+    background: rgba(8, 38, 92, 0.30);
+    color: #F4F6FA;
+    font-family: "Sora", sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition:
+        border-color 0.25s ease,
+        background 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.login input[type="email"]:focus,
+.login input[type="password"]:focus {
+    border-color: rgba(250, 199, 57, 0.65);
+    background: rgba(8, 38, 92, 0.45);
+    box-shadow:
+        0 0 12px rgba(250, 199, 57, 0.10);
+}
+
+.login input::placeholder {
+    color: #8B96AD;
+}
+
+.password-box {
+    position: relative;
+    margin-top: 16px;
+}
+
+#togglePassword {
+    position: absolute;
+    right: 10px;
+    bottom: 6px;
+    height: 34px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #FAC739;
+    font-family: "Sora", sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+#togglePassword:hover {
+    background: rgba(250, 199, 57, 0.08);
+}
+
+.password-box a {
+    display: block;
+    margin-top: 8px;
+    color: #8B96AD;
+    font-size: 11px;
+    text-decoration: none;
+    transition: color 0.25s ease;
+}
+
+.password-box a:hover {
+    color: #FAC739;
+}
+
+.role-selector {
+    margin-top: 18px;
+}
+
+.role-selector > label {
+    display: block;
+    margin-bottom: 8px;
+    color: #8B96AD;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.role-options {
+    display: flex;
+    width: 100%;
+    gap: 8px;
+}
+
+.role-option {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 43px;
+    padding: 0 7px;
+    background: rgba(8, 38, 92, 0.45);
+    border: 1px solid rgba(0, 166, 200, 0.35);
+    border-radius: 10px;
+    color: #8B96AD;
+    font-family: "Sora", sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    transition:
+        background 0.25s ease,
+        border-color 0.25s ease,
+        color 0.25s ease,
+        box-shadow 0.25s ease,
+        transform 0.25s ease;
+}
+
+.role-icon {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.role-option:hover {
+    background: rgba(8, 38, 92, 0.70);
+    border-color: rgba(0, 166, 200, 0.75);
+    color: #F4F6FA;
+    box-shadow:
+        0 0 15px rgba(0, 166, 200, 0.15);
+    transform: translateY(-1px);
+}
+
+.role-option.active {
+    background: rgba(8, 38, 92, 0.70);
+    border-color: #FAC739;
+    color: #FAC739;
+    box-shadow:
+        0 0 15px rgba(250, 199, 57, 0.18);
+}
+
+.role-option.active:hover {
+    background: rgba(8, 38, 92, 0.80);
+    border-color: #FAC739;
+    color: #FAC739;
+    box-shadow:
+        0 0 20px rgba(250, 199, 57, 0.25);
+}
+
+.login > form > label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 16px;
+    color: #8B96AD;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.login input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    accent-color: #FAC739;
+    cursor: pointer;
+}
+
+.login form > button[type="submit"] {
+    width: 100%;
+    height: 46px;
+    margin-top: 18px;
+    border: none;
+    border-radius: 10px;
+    background: #FAC739;
+    color: #02072F;
+    font-family: "Sora", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow:
+        0 0 18px rgba(250, 199, 57, 0.22);
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        background 0.25s ease;
+}
+
+.login form > button[type="submit"]:hover {
+    background: #FFD45C;
+    transform: translateY(-1px);
+    box-shadow:
+        0 0 25px rgba(250, 199, 57, 0.38);
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 18px 0;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(139, 150, 173, 0.20);
+}
+
+.divider span {
+    color: #8B96AD;
+    font-size: 10px;
+}
+
+#googleLogin {
+    width: 100%;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid rgba(0, 166, 200, 0.30);
+    border-radius: 10px;
+    background: rgba(8, 38, 92, 0.35);
+    color: #F4F6FA;
+    font-family: "Sora", sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+        background 0.25s ease,
+        border-color 0.25s ease,
+        transform 0.25s ease;
+}
+
+#googleLogin:hover {
+    background: rgba(8, 38, 92, 0.60);
+    border-color: rgba(0, 166, 200, 0.65);
+    transform: translateY(-1px);
+}
+
+#googleLogin span:first-child {
+    color: #FAC739;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+@media (max-height: 800px) {
+    .logo {
+        top: 18px;
+    }
+
+    .logo img {
+        width: 72px;
+        height: 72px;
+    }
+
+    .tagline {
+        top: 94px;
+    }
+
+    .login {
+        top: 155px;
+    }
+}
+
+@media (max-width: 500px) {
+    .login {
+        width: calc(100% - 30px);
+        padding: 27px 25px;
+        top: 165px;
+    }
+
+    .logo img {
+        width: 70px;
+        height: 70px;
+    }
+
+    .tagline {
+        top: 100px;
+    }
+
+    .role-option {
+        font-size: 10px;
+    }
+}
+.password-box {
+    position: relative;
+    margin-top: 18px;
+}
+
+.password-box label {
+    display: block;
+    margin-bottom: 8px;
+    color: #F4F6FA;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.password-box input[type="password"],
+.password-box input[type="text"] {
+    width: 100%;
+    height: 46px;
+    padding: 0 65px 0 15px;
+    box-sizing: border-box;
+
+    border: 1px solid rgba(139, 150, 173, 0.25);
+    border-radius: 10px;
+
+    background: rgba(8, 38, 92, 0.30);
+    color: #F4F6FA;
+
+    font-family: "Sora", sans-serif;
+    font-size: 13px;
+
+    outline: none;
+}
+
+.password-box input[type="password"]:focus,
+.password-box input[type="text"]:focus {
+    border-color: rgba(250, 199, 57, 0.65);
+    background: rgba(8, 38, 92, 0.45);
+    box-shadow: 0 0 12px rgba(250, 199, 57, 0.10);
+}
+
+#togglePassword {
+    position: absolute;
+    right: 10px;
+    bottom: 6px;
+
+    height: 34px;
+    padding: 0 10px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: transparent !important;
+    color: #FAC739 !important;
+
+    font-family: "Sora", sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+
+    cursor: pointer;
+}
+
+#togglePassword:hover {
+    background: rgba(250, 199, 57, 0.08) !important;
+    color: #FFD45C !important;
+}

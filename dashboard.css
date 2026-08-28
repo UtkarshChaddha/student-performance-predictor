@@ -1,0 +1,329 @@
+/* ============================= */
+/*             BODY              */
+/* ============================= */
+
+body {
+    margin: 0;
+
+    background: linear-gradient(
+        135deg,
+        #02072F,
+        #08265C
+    );
+
+    font-family: Arial, sans-serif;
+}
+
+
+/* ============================= */
+/*        GOLDEN NAVBAR          */
+/* ============================= */
+
+nav {
+    display: flex;
+    align-items: center;
+
+    height: 82px;
+
+    padding: 0 24px;
+
+    margin: 30px 25px 0 25px;
+
+    background: linear-gradient(
+        135deg,
+        #FAC739,
+        #D9A91F
+    );
+
+    border: 1px solid rgba(255, 255, 255, 0.25);
+
+    border-radius: 20px;
+
+    box-shadow:
+        0 0 20px rgba(250, 199, 57, 0.45),
+        0 8px 30px rgba(0, 0, 0, 0.30);
+
+    position: relative;
+}
+
+
+/* ============================= */
+/*         NAVBAR SHINE          */
+/* ============================= */
+
+nav::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background: linear-gradient(
+        120deg,
+        transparent 20%,
+        rgba(255, 255, 255, 0.20),
+        transparent 80%
+    );
+
+    opacity: 0.5;
+
+    pointer-events: none;
+
+    border-radius: inherit;
+}
+
+
+/* ============================= */
+/*             LOGO              */
+/* ============================= */
+
+.logo {
+    display: flex;
+    align-items: center;
+
+    margin-right: 35px;
+}
+
+.logo img {
+    width: 58px;
+    height: 58px;
+
+    object-fit: contain;
+}
+
+
+/* ============================= */
+/*        MAIN NAVIGATION        */
+/* ============================= */
+
+.nav-links {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+/* ============================= */
+/*       NAVIGATION BUTTONS      */
+/* ============================= */
+
+.nav-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    height: 60px;
+
+    padding: 0 18px;
+
+    border: none;
+
+    border-radius: 14px;
+
+    background: transparent;
+
+    color: #02072F;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.25s ease,
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+
+/* ============================= */
+/*          NAV ICONS            */
+/* ============================= */
+
+.nav-button img {
+    width: 32px;
+    height: 32px;
+
+    object-fit: contain;
+}
+
+
+/* ============================= */
+/*        NAV BUTTON HOVER        */
+/* ============================= */
+
+.nav-button:hover {
+    background: rgba(2, 7, 47, 0.12);
+
+    box-shadow:
+        0 0 15px rgba(2, 7, 47, 0.12);
+
+    transform: translateY(-1px);
+}
+
+
+/* ============================= */
+/*          USER ACTIONS         */
+/* ============================= */
+
+.user-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    margin-left: auto;
+}
+
+
+/* ============================= */
+/*          USER GREETING        */
+/* ============================= */
+
+.user-greeting {
+    color: #02072F;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    margin-right: 8px;
+
+    white-space: nowrap;
+}
+
+
+/* ============================= */
+/*       USER ACTION BUTTONS     */
+/* ============================= */
+
+.user-actions button {
+    height: 50px;
+
+    padding: 0 16px;
+
+    border: 1px solid rgba(2, 7, 47, 0.25);
+
+    border-radius: 12px;
+
+    background: rgba(2, 7, 47, 0.88);
+
+    color: #FAC739;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.25s ease,
+        box-shadow 0.25s ease,
+        transform 0.25s ease;
+}
+
+
+/* ============================= */
+/*       USER BUTTON HOVER       */
+/* ============================= */
+
+.user-actions button:hover {
+    background: #02072F;
+
+    box-shadow:
+        0 0 18px rgba(2, 7, 47, 0.30);
+
+    transform: translateY(-1px);
+}
+
+
+/* ============================= */
+/*         DASHBOARD MAIN        */
+/* ============================= */
+
+main {
+    margin: 45px 40px;
+
+    color: #F4F6FA;
+}
+
+
+/* ============================= */
+/*        WELCOME HEADING        */
+/* ============================= */
+
+main h1 {
+    margin: 0;
+
+    color: #FAC739;
+
+    font-size: 38px;
+
+    font-weight: 700;
+
+    letter-spacing: -0.8px;
+
+    text-shadow:
+        0 0 12px rgba(250, 199, 57, 0.20);
+}
+
+
+/* ============================= */
+/*         WELCOME TEXT          */
+/* ============================= */
+
+main p {
+    margin-top: 10px;
+
+    color: #8B96AD;
+
+    font-size: 17px;
+}
+
+
+/* ============================= */
+/*       CONTINUE BUTTON         */
+/* ============================= */
+
+main > button {
+    margin-top: 18px;
+
+    padding: 13px 22px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    background: #FAC739;
+
+    color: #02072F;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 0 18px rgba(250, 199, 57, 0.25);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+
+/* ============================= */
+/*      CONTINUE BUTTON HOVER    */
+/* ============================= */
+
+main > button:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 0 25px rgba(250, 199, 57, 0.40);
+}
