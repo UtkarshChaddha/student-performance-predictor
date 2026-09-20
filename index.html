@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="description"
+        content="Adhyan — Personalized learning, built around you."
+    >
+
+    <meta name="theme-color" content="#02072F">
+
+    <title>Adhyan — Login</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="login.css">
+</head>
+
+<body>
+
+    <main class="scene">
+
+        <!-- =========================
+             AMBIENT BACKGROUND
+        ========================== -->
+
+        <div class="ambient ambient-a"></div>
+
+        <div
+            class="ambient ambient-b"
+            id="mouseGlow"
+        ></div>
+
+
+        <!-- =========================
+             STARS
+        ========================== -->
+
+        <div
+            class="stars"
+            aria-hidden="true"
+        >
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+        </div>
+
+
+        <!-- =========================
+             BACKGROUND ORBIT
+        ========================== -->
+
+        <div
+            class="orbit-field"
+            aria-hidden="true"
+        >
+            <span class="orbit orbit-1"></span>
+            <span class="orbit orbit-2"></span>
+
+            <span class="orbit-dot dot-a"></span>
+            <span class="orbit-dot dot-b"></span>
+            <span class="orbit-dot dot-c"></span>
+        </div>
+
+
+        <!-- =========================
+             BRAND
+        ========================== -->
+
+        <header class="brand">
+
+            <div class="logo-shell">
+
+                <span class="logo-orbit orbit-left"></span>
+                <span class="logo-orbit orbit-right"></span>
+
+                <img
+                    src="logo.png"
+                    alt="Adhyan Logo"
+                >
+
+            </div>
+
+            <div class="wordmark">
+                ADHYAN
+            </div>
+
+            <p>
+                <span>learn</span>
+                <b>•</b>
+                <span>evolve</span>
+                <b>•</b>
+                <span>succeed</span>
+            </p>
+
+        </header>
+
+
+        <!-- =========================
+             LOGIN
+        ========================== -->
+
+        <section
+            class="login-wrap"
+            aria-label="Adhyan login"
+        >
+
+            <div
+                class="card"
+                id="loginCard"
+            >
+
+                <div
+                    class="card-shine"
+                    aria-hidden="true"
+                ></div>
+
+
+                <!-- =========================
+                     CARD HEADER
+                ========================== -->
+
+                <div class="card-header">
+
+                    <span class="eyebrow">
+                        YOUR LEARNING JOURNEY
+                    </span>
+
+                    <h1>
+                        Welcome back<span>.</span>
+                    </h1>
+
+                    <p>
+                        Pick up where your progress left off.
+                    </p>
+
+                </div>
+
+
+                <!-- =========================
+                     LOGIN FORM
+                ========================== -->
+
+                <form
+                    id="loginForm"
+                    novalidate
+                >
+
+                    <!-- Email -->
+
+                    <div class="field">
+
+                        <label for="email">
+                            Email
+                        </label>
+
+                        <div class="input-wrap">
+
+                            <span
+                                class="input-icon"
+                                aria-hidden="true"
+                            >
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                >
+                                    <rect
+                                        x="3"
+                                        y="5"
+                                        width="18"
+                                        height="14"
+                                        rx="2"
+                                    ></rect>
+
+                                    <path d="M3 7l9 6 9-6"></path>
+                                </svg>
+                            </span>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="Enter your email"
+                                autocomplete="email"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Password -->
+
+                    <div class="field field-gap">
+
+                        <div class="password-label">
+                            <label for="password">Password</label>
+                        </div>
+
+
+                        <div class="input-wrap">
+
+                            <span
+                                class="input-icon"
+                                aria-hidden="true"
+                            >
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                >
+                                    <rect
+                                        x="4"
+                                        y="10"
+                                        width="16"
+                                        height="11"
+                                        rx="2"
+                                    ></rect>
+
+                                    <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+                                </svg>
+                            </span>
+
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                                required
+                            >
+
+                            <button
+                                type="button"
+                                class="show-btn"
+                                id="togglePassword"
+                                aria-label="Show password"
+                            >
+                                Show
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =========================
+                         STAY SIGNED IN
+                    ========================== -->
+
+                    <label class="check">
+
+                        <input
+                            type="checkbox"
+                            id="staySignedIn"
+                        >
+
+                        <span>
+                            Stay signed in
+                        </span>
+
+                    </label>
+
+
+                    <!-- =========================
+                         LOGIN BUTTON
+                    ========================== -->
+
+                    <button
+                        type="submit"
+                        class="login-btn"
+                    >
+
+                        <span id="loginText">
+                            Enter Adhyan
+                        </span>
+
+                        <strong>
+                            →
+                        </strong>
+
+                    </button>
+
+
+                    <!-- =========================
+                         DIVIDER
+                    ========================== -->
+
+                    <div class="divider">
+                        <span>OR</span>
+                    </div>
+
+
+                    <!-- =========================
+                         DEMO LOGIN
+                    ========================== -->
+
+                    <button
+                        type="button"
+                        class="demo-login"
+                        id="demoLogin"
+                        aria-label="Enter Adhyan demo mode"
+                    >
+
+                        <span class="demo-icon">
+                            ⚡
+                        </span>
+
+                        <span class="demo-text">
+
+                            <strong>
+                                Enter Demo Mode
+                            </strong>
+
+                            <small>
+                                Quick hackathon preview
+                            </small>
+
+                        </span>
+
+                        <b>
+                            →
+                        </b>
+
+                    </button>
+
+
+                    <!-- =========================
+                         STATUS
+                    ========================== -->
+
+                    <div
+                        class="status"
+                        id="status"
+                        aria-live="polite"
+                        role="status"
+                    ></div>
+
+                </form>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             FOOTER
+        ========================== -->
+
+        <footer>
+            ADHYAN • PERSONALIZED LEARNING, BUILT AROUND YOU
+        </footer>
+
+    </main>
+
+
+    <script src="runtime-config.js?v=1"></script>
+    <script src="login.js?v=10"></script>
+</body>
+
+</html>

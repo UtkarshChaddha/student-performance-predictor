@@ -7,79 +7,45 @@
 
     <title>Adhyan Dashboard</title>
 
-    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="dashboard.css?v=5">
 </head>
 
 <body>
 
-    <!-- ========================= -->
-    <!--        NAVBAR             -->
-    <!-- ========================= -->
+    <!-- ================= NAVBAR ================= -->
 
     <nav>
 
-        <!-- Adhyan Logo -->
         <div class="logo">
             <img src="logo.png" alt="Adhyan">
         </div>
 
-
-        <!-- Main Navigation -->
         <div class="nav-links">
 
-            <!-- Home -->
             <button type="button" class="nav-button">
                 <img src="homeicon.png" alt="">
                 <span>Home</span>
             </button>
 
-
-            <!-- Subjects -->
-            <button type="button" class="nav-button">
-                <img src="subjecticon.png" alt="">
-                <span>Subjects</span>
-            </button>
-
-
-            <!-- Tests -->
             <button type="button" class="nav-button">
                 <img src="testicon.png" alt="">
                 <span>Tests</span>
             </button>
 
-
-            <!-- Problems -->
-            <button type="button" class="nav-button">
-                <img src="problemicon.png" alt="">
-                <span>Problems</span>
+            <button type="button" class="nav-button" id="community-nav">
+                <span class="nav-text-icon">◎</span>
+                <span>Community</span>
             </button>
 
         </div>
 
-
-        <!-- User Actions -->
         <div class="user-actions">
 
-            <!-- Greeting -->
             <span class="user-greeting">
                 Hi, Utkarsh 👋
             </span>
 
-
-            <!-- Streak -->
-            <button type="button">
-                🔥 12
-            </button>
-
-
-            <!-- Notifications -->
-            <button type="button">
-                🔔
-            </button>
-
-
-            <!-- Profile -->
-            <button type="button">
+            <button type="button" class="profile-btn">
                 Profile
             </button>
 
@@ -88,35 +54,690 @@
     </nav>
 
 
-    <!-- ========================= -->
-    <!--        SIDEBAR            -->
-    <!-- ========================= -->
-
-    <aside>
-        navigation
-    </aside>
-
-
-    <!-- ========================= -->
-    <!--      MAIN DASHBOARD        -->
-    <!-- ========================= -->
-
     <main>
 
-        <h1>
-            Good morning, Utkarsh 👋
-        </h1>
+        <!-- ================= WELCOME ================= -->
 
-        <p>
-            Ready to continue learning?
+        <section class="welcome-section">
+
+            <div>
+
+                <span class="section-label">
+                    WELCOME BACK
+                </span>
+
+                <h1>
+                    Good morning, Utkarsh 👋
+                </h1>
+
+                <p>
+                    Your personalized learning journey continues.
+                </p>
+
+            </div>
+
+            <button type="button" id="continue-learning">
+                Continue Learning →
+            </button>
+
+        </section>
+
+        <section class="community-section" id="community">
+            <div class="community-heading">
+                <div>
+                    <span class="section-label">ADHYAN COMMUNITY</span>
+                    <h2>Learn out loud.</h2>
+                    <p>Ask questions, share progress, and find people learning alongside you.</p>
+                </div>
+                <div class="community-tools">
+                    <input id="community-search" type="search" placeholder="Search posts" aria-label="Search posts">
+                    <select id="community-filter" aria-label="Filter community posts">
+                        <option value="all">All posts</option>
+                        <option value="question">Questions</option>
+                        <option value="win">Small wins</option>
+                    </select>
+                    <button type="button" class="community-refresh" id="community-refresh" aria-label="Refresh community">↻</button>
+                </div>
+            </div>
+
+                <div class="community-layout">
+                    <aside class="community-profile-rail">
+                        <div class="community-cover"></div>
+                        <div class="community-profile-avatar">UR</div>
+                        <strong>Utkarsh Rao</strong>
+                        <span>Computer science learner</span>
+                        <div class="community-profile-stats"><b>24</b><b>186</b><small>Posts&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Connections</small></div>
+                        <a href="#community">View your profile →</a>
+                    </aside>
+
+                    <div class="community-main-column">
+                        <form class="community-composer" id="community-form">
+                            <div class="community-avatar">UR</div>
+                            <div class="composer-main">
+                                <textarea id="community-content" maxlength="500" required
+                                    placeholder="Start a post, ask a question, or share a win..."></textarea>
+                                <div class="composer-footer">
+                                    <span>Share with your learning network</span>
+                                    <select id="community-topic" aria-label="Post topic">
+                                        <option value="discussion">Discussion</option>
+                                        <option value="question">Question</option>
+                                        <option value="win">Small win</option>
+                                    </select>
+                                    <button type="submit" id="community-submit" disabled>Post →</button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="community-feed" id="community-feed" aria-live="polite"></div>
+                    </div>
+
+                    <aside class="community-trends">
+                        <div class="community-side-card"><h3>Trending topics</h3><a href="#community">#examseason <small>128 posts</small></a><a href="#community">#webdevelopment <small>96 posts</small></a><a href="#community">#studyhabits <small>74 posts</small></a></div>
+                        <div class="community-side-card"><h3>People to learn from</h3><p><b>Nisha Kapoor</b><small>Physics · 2.4k XP</small></p><p><b>Vikram Mehta</b><small>Computer science · 1.8k XP</small></p></div>
+                    </aside>
+                </div>
+        </section>
+
+        <section class="feature-card ai-launch-card" id="doubt-coach">
+            <span class="feature-icon">💡</span>
+            <span class="feature-label">ADHYAN TUTOR</span>
+            <h3>Ask a doubt</h3>
+            <p>Open the tutor panel for a step-by-step explanation.</p>
+            <button type="button" id="open-doubt-panel" class="card-button">
+                Open AI Tutor →
+            </button>
+        </section>
+
+        <div class="ai-panel-backdrop" id="doubt-panel" hidden>
+            <section class="ai-tutor-panel" role="dialog" aria-modal="true"
+                aria-labelledby="doubt-panel-title">
+                <div class="ai-tutor-header">
+                    <div>
+                        <span class="feature-label">ADHYAN AI TUTOR</span>
+                        <h2 id="doubt-panel-title">Let's solve it together</h2>
+                    </div>
+                    <button type="button" id="close-doubt-panel"
+                        class="ai-close-button" aria-label="Close AI tutor">×</button>
+                </div>
+                <p class="ai-tutor-subtitle">
+                    Ask about Python, Java, C Programming, or Algorithms.
+                    Adhyan explains the idea and gives you a small check to try.
+                </p>
+                <div class="sample-prompts" aria-label="Sample prompts">
+                    <span>Try a sample:</span>
+                    <button type="button" class="sample-prompt"
+                        data-prompt="Explain recursion with a simple example.">Recursion</button>
+                    <button type="button" class="sample-prompt"
+                        data-prompt="Why does binary search need sorted data?">Binary search</button>
+                    <button type="button" class="sample-prompt"
+                        data-prompt="How do I fix a Java NullPointerException?">Java null</button>
+                    <button type="button" class="sample-prompt"
+                        data-prompt="What is a C pointer and how do I use it safely?">C pointers</button>
+                </div>
+                <div class="coding-controls">
+                    <label>
+                        Coding language
+                        <select id="coding-language">
+                            <option value="">Auto detect</option>
+                            <option>Python</option>
+                            <option>Java</option>
+                            <option>C</option>
+                            <option>C++</option>
+                            <option>JavaScript</option>
+                            <option>TypeScript</option>
+                            <option>SQL</option>
+                            <option>Go</option>
+                            <option>Rust</option>
+                        </select>
+                    </label>
+                    <label class="code-input-label">
+                        Optional code
+                        <textarea id="coding-code" rows="3"
+                            placeholder="Paste a snippet for debugging or review"></textarea>
+                    </label>
+                </div>
+                <form id="doubt-form">
+                    <textarea id="doubt-message" required rows="4"
+                        placeholder="Example: Why does binary search need sorted data?"></textarea>
+                    <button type="submit" class="card-button" id="doubt-submit">
+                        Explain this →
+                    </button>
+                    <button type="button" class="card-button secondary-button"
+                        id="code-orchestrate-submit">
+                        Orchestrate code →
+                    </button>
+                </form>
+                <div class="ai-answer" id="doubt-response" role="status"
+                    aria-live="polite">
+                    Your explanation will appear here.
+                </div>
+            </section>
+        </div>
+
+
+        <!-- ================= ADHYAN AI SLIDER ================= -->
+
+        <section class="promo-slider">
+
+            <!-- SLIDE 1 -->
+
+            <div class="promo-slide active">
+
+                <div class="promo-content">
+
+                    <span class="promo-label">
+                        ADHYAN AI
+                    </span>
+
+                    <h2>
+                        Your learning.<br>
+                        Your strategy.
+                    </h2>
+
+                    <p>
+                        Adhyan analyzes your performance and continuously
+                        adapts what you should learn next.
+                    </p>
+
+                    <button type="button" id="explore-adaptive">
+                        Explore Adaptive AI →
+                    </button>
+
+                </div>
+
+                <div class="promo-visual">
+
+                    <div class="ai-circle">
+                        🧠
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SLIDE 2 -->
+
+            <div class="promo-slide">
+
+                <div class="promo-content">
+
+                    <span class="promo-label">
+                        COLLABORATIVE INTELLIGENCE
+                    </span>
+
+                    <h2>
+                        Find students<br>
+                        learning like you.
+                    </h2>
+
+                    <p>
+                        Get matched with students studying the same
+                        topic at a similar skill level.
+                    </p>
+
+                    <button type="button" id="promo-study-room">
+                        Find Study Room →
+                    </button>
+
+                </div>
+
+                <div class="promo-visual">
+
+                    <div class="ai-circle">
+                        👥
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SLIDE 3 -->
+
+            <div class="promo-slide">
+
+                <div class="promo-content">
+
+                    <span class="promo-label">
+                        ADAPTIVE FOCUS
+                    </span>
+
+                    <h2>
+                        Your study routine<br>
+                        learns with you.
+                    </h2>
+
+                    <p>
+                        Study sessions can adapt according to your
+                        focus patterns and learning behavior.
+                    </p>
+
+                    <button type="button" id="promo-focus">
+                        Start Focus →
+                    </button>
+
+                </div>
+
+                <div class="promo-visual">
+
+                    <div class="challenge-icon">
+                        ⏱️
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SLIDER DOTS -->
+
+            <div class="slider-dots">
+
+                <span class="dot active"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+
+            </div>
+
+        </section>
+
+
+<!-- ================= ADAPTIVE ENGINE ================= -->
+
+<section class="adaptive-card" id="adaptive-engine">
+
+    <div class="adaptive-content">
+
+        <span class="feature-label">
+            ADHYAN ADAPTIVE ENGINE
+        </span>
+
+        <h2 id="ai-recommendation">
+            Loading your next best learning step...
+        </h2>
+
+        <p id="ai-recommendation-text">
+            Adhyan is analyzing your learning progress.
         </p>
 
-        <button type="button">
-            Continue Learning →
+        <div class="recommendation-meta">
+            <span id="ai-subject">--</span>
+            <span id="ai-difficulty">--</span>
+            <span id="ai-status">DQN powered</span>
+        </div>
+
+        <div class="rl-trace" aria-label="Reinforcement learning policy trace">
+            <div class="rl-trace-heading">
+                <span>RL POLICY TRACE</span>
+                <strong id="rl-selected-action">Waiting for state</strong>
+            </div>
+            <div class="rl-state" id="rl-state">
+                <span>Accuracy --</span><span>Attempts --</span><span>Time --</span><span>Mastery --</span>
+            </div>
+            <div class="q-values" id="q-values" aria-label="Action value estimates"></div>
+        </div>
+
+        <button type="button" id="start-ai-session">
+            Start Recommended Session →
         </button>
+
+    </div>
+
+    <div class="adaptive-visual">
+
+        <div class="ai-orbit">
+            🧠
+        </div>
+
+    </div>
+
+</section>
+
+        <section class="coach-card" id="smart-session">
+            <span class="feature-label">SMART SESSION CHUNK</span>
+            <h3 id="session-title">Your adaptive session</h3>
+            <p id="session-plan">Start the recommended session to receive a focused learning chunk.</p>
+            <div class="recommendation-meta">
+                <span id="session-subject">--</span>
+                <span id="session-topic">--</span>
+                <span id="session-action">--</span>
+            </div>
+            <div class="focus-timer">
+                <label for="focus-length">Focus time</label>
+                <select id="focus-length">
+                    <option value="15">15 min</option>
+                    <option value="25" selected>25 min</option>
+                    <option value="45">45 min</option>
+                </select>
+                <strong id="focus-countdown">25:00</strong>
+                <button type="button" id="focus-timer-button">Start focus chunk</button>
+                <button type="button" id="stop-focus-button" class="secondary-button">
+                    Stop session
+                </button>
+            </div>
+            <p id="ai-explanation" class="recommendation-reason"></p>
+        </section>
+
+        <!-- ================= QUICK STATS ================= -->
+
+        <section class="quick-stats">
+
+
+            <!-- SKILLS -->
+
+            <div class="stat-card">
+
+                <span class="stat-label">
+                    YOUR SKILLS
+                </span>
+
+                <h3>
+                    Skill Progress
+                </h3>
+
+                <div class="skill-row">
+                    <span>DSA</span>
+                    <strong>Gold</strong>
+                </div>
+
+                <div class="skill-row">
+                    <span>Python</span>
+                    <strong>Silver</strong>
+                </div>
+
+                <div class="skill-row">
+                    <span>Machine Learning</span>
+                    <strong>Bronze</strong>
+                </div>
+
+            </div>
+
+
+            <!-- DYNAMIC DATABASE STATS -->
+
+            <div class="stat-card">
+
+                <span class="stat-label">
+                    STUDENT DATA
+                </span>
+
+                <h3>
+                    Live Learning Data
+                </h3>
+
+                <p>
+                    Data currently being retrieved from PostgreSQL.
+                </p>
+
+                <div class="study-stats">
+
+                    <div>
+
+                        <strong id="interest-level">
+                            --
+                        </strong>
+
+                        <span>
+                            Avg Interest
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <strong id="learning-depth">
+                            --
+                        </strong>
+
+                        <span>
+                            Avg Learning Depth
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="card-button"
+                    id="refresh-dashboard">
+
+                    Refresh Data →
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= MAIN FEATURES ================= -->
+
+        <section class="main-features">
+
+
+            <!-- ================= SUBJECTS ================= -->
+
+            <div class="feature-card">
+
+                <span class="feature-icon">
+                    📚
+                </span>
+
+                <span class="stat-label">
+                    LEARNING
+                </span>
+
+                <h3>
+                    Subjects
+                </h3>
+
+
+                <div class="subject-row">
+
+                    <span>
+                        Data Structures
+                    </span>
+
+                    <span>
+                        75%
+                    </span>
+
+                </div>
+
+                <div class="mini-progress">
+                    <div style="width: 75%;"></div>
+                </div>
+
+
+                <div class="subject-row">
+
+                    <span>
+                        Python
+                    </span>
+
+                    <span>
+                        62%
+                    </span>
+
+                </div>
+
+                <div class="mini-progress">
+                    <div style="width: 62%;"></div>
+                </div>
+
+
+                <div class="subject-row">
+
+                    <span>
+                        Machine Learning
+                    </span>
+
+                    <span>
+                        48%
+                    </span>
+
+                </div>
+
+                <div class="mini-progress">
+                    <div style="width: 48%;"></div>
+                </div>
+
+            </div>
+
+
+            <!-- ================= COLLABORATION ================= -->
+
+            <div class="feature-card collaboration-card">
+
+                <span class="feature-icon">
+                    👥
+                </span>
+
+                <span class="feature-label">
+                    ADHYAN COLLABORATIVE
+                </span>
+
+                <h3>
+                    Find your study room
+                </h3>
+
+                <p>
+                    Study with students learning the same topic
+                    at a similar skill level.
+                </p>
+
+
+                <!-- DYNAMIC STUDENT COUNT -->
+
+                <div class="room-info">
+
+                    <strong id="student-count">
+                        Loading students...
+                    </strong>
+
+                    <span id="student-topic">
+                        Connecting to Adhyan backend...
+                    </span>
+
+                </div>
+
+
+                <!-- DYNAMIC STUDENT LIST -->
+
+                <div id="student-list">
+
+                    Loading students...
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="refresh-students">
+
+                    Find a Study Room →
+
+                </button>
+
+            </div>
+
+
+            <!-- ================= TESTS ================= -->
+
+            <div class="feature-card">
+
+                <span class="feature-icon">
+                    📝
+                </span>
+
+                <span class="stat-label">
+                    UPCOMING
+                </span>
+
+                <h3>
+                    Tests
+                </h3>
+
+
+                <p>
+                    Use the authenticated Practice Lab for curated Python,
+                    Java, C, and algorithm questions with server-side answer
+                    checking.
+                </p>
+
+
+                <button type="button" id="open-practice" class="card-button">
+                    View All Tests →
+                </button>
+
+            </div>
+
+
+            <!-- ================= ACTIVITY ================= -->
+
+            <div class="feature-card">
+
+                <span class="feature-icon">
+                    📈
+                </span>
+
+                <span class="stat-label">
+                    RECENT ACTIVITY
+                </span>
+
+                <h3>
+                    Your Progress
+                </h3>
+
+
+                <p>
+                    Activity will appear after you complete a recommendation
+                    or Practice Lab question.
+                </p>
+
+            </div>
+
+        </section>
 
     </main>
 
+
+    <!-- ================= JAVASCRIPT ================= -->
+
+    <script src="runtime-config.js?v=1"></script>
+    <script src="dashboard.js?v=15"></script>
+    <script src="community.js?v=1"></script>
+    <script>
+        (() => {
+            const bind = (id, action) => {
+                const element = document.getElementById(id);
+                if (!element || element.dataset.fallbackBound) return;
+                element.dataset.fallbackBound = "true";
+                element.addEventListener("click", action);
+            };
+            bind("open-practice", () => {
+                if (typeof openPractice === "function") openPractice();
+            });
+            bind("continue-learning", () => {
+                if (typeof startRecommendedSession === "function") startRecommendedSession();
+            });
+            bind("explore-adaptive", () => {
+                document.getElementById("ai-recommendation")?.scrollIntoView({behavior: "smooth"});
+            });
+            bind("promo-focus", () => {
+                if (typeof toggleFocusTimer === "function") toggleFocusTimer();
+            });
+            bind("promo-study-room", () => {
+                if (typeof loadStudents === "function") loadStudents();
+            });
+            bind("community-nav", () => {
+                window.location.href = "community.html";
+            });
+        })();
+    </script>
 
 </body>
 

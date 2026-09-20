@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Adhyan Community - learn, share, and grow together.">
+<title>Adhyan Community</title>
+<link rel="stylesheet" href="community-page.css?v=1">
+</head>
+<body>
+<header class="community-nav">
+    <a class="brand" href="dashboard.html"><span class="brand-mark">A</span><span>ADHYAN</span></a>
+    <label class="global-search"><span>⌕</span><input id="page-search" type="search" placeholder="Search learning, people, or posts" aria-label="Search community"></label>
+    <nav><a class="active" href="community.html">Community</a><a href="dashboard.html">Dashboard</a><a href="dashboard.html#adaptive-engine">Adaptive AI</a></nav>
+    <div class="profile-chip">UR</div>
+</header>
+<main class="community-page">
+    <section class="community-hero">
+        <div>
+            <span class="eyebrow">THE LEARNING NETWORK</span>
+            <h1>Learn in public.<br><em>Grow together.</em></h1>
+            <p>Find useful ideas, share progress, and discover people who are one curious question away.</p>
+        </div>
+        <div class="hero-stats"><div><strong>12.8k</strong><span>Learners</span></div><div><strong>4.2k</strong><span>Study circles</span></div><div><strong>86%</strong><span>Helpful replies</span></div></div>
+    </section>
+
+    <div class="page-layout">
+        <aside class="left-rail">
+            <section class="identity-card"><div class="cover-art"></div><div class="large-avatar">UR</div><h2>Utkarsh Rao</h2><p>Computer science learner</p><div class="identity-links"><span><b>24</b> Posts</span><span><b>186</b> Connections</span></div><button class="outline-button">View profile</button></section>
+            <nav class="section-nav"><a class="selected" href="#feed">◈ Feed</a><a href="#videos">▶ Learning videos</a><a href="#people">◎ People</a><a href="#groups">◌ Study circles</a><a href="#saved">♡ Saved posts</a></nav>
+        </aside>
+
+        <section class="main-feed" id="feed">
+            <div class="feed-toolbar"><div><span class="eyebrow">COMMUNITY FEED</span><h2>What is happening in Adhyan</h2></div><select id="page-filter" aria-label="Filter posts"><option value="all">Latest</option><option value="question">Questions</option><option value="win">Small wins</option></select></div>
+            <form class="page-composer" id="page-post-form"><div class="large-avatar small">UR</div><div class="composer-content"><textarea id="page-post-content" maxlength="500" required placeholder="Share a question, a lesson, or a small win..."></textarea><div class="composer-bar"><span>Everyone in Adhyan can see this</span><select id="page-post-topic" aria-label="Post topic"><option value="discussion">Discussion</option><option value="question">Question</option><option value="win">Small win</option></select><button id="page-post-submit" type="submit" disabled>Post</button></div></div></form>
+            <div id="page-feed" class="page-feed" aria-live="polite"></div>
+        </section>
+
+        <aside class="right-rail">
+            <section class="video-panel" id="videos"><div class="panel-heading"><div><span class="eyebrow">ADHYAN WATCH</span><h2>Learn in 10 minutes</h2></div><a href="#videos">See all</a></div><article class="video-card"><div class="thumbnail thumb-blue"><span class="play">▶</span><b>01:08</b><strong>QUICKSORT<br>WITHOUT THE CONFUSION</strong></div><h3>Why pivot choice matters</h3><p>Nisha Kapoor · 2.4k views</p></article><article class="video-card"><div class="thumbnail thumb-gold"><span class="play">▶</span><b>02:16</b><strong>BUILD A<br>FOCUS SYSTEM</strong></div><h3>Study blocks that actually work</h3><p>Vikram Mehta · 1.1k views</p></article></section>
+            <section class="side-panel" id="people"><div class="panel-heading"><h2>People to learn from</h2><a href="#people">See all</a></div><div class="person"><span class="person-avatar coral">NK</span><span><b>Nisha Kapoor</b><small>Physics · 2.4k XP</small></span><button>+</button></div><div class="person"><span class="person-avatar blue">VM</span><span><b>Vikram Mehta</b><small>Computer science · 1.8k XP</small></span><button>+</button></div><div class="person"><span class="person-avatar mint">MS</span><span><b>Maya Shah</b><small>Python · 1.5k XP</small></span><button>+</button></div></section>
+            <section class="side-panel trending"><div class="panel-heading"><h2>Trending today</h2></div><a href="#feed"><b>#examseason</b><small>128 conversations</small></a><a href="#feed"><b>#webdevelopment</b><small>96 conversations</small></a><a href="#feed"><b>#studyhabits</b><small>74 conversations</small></a></section>
+        </aside>
+    </div>
+</main>
+<div class="toast" id="page-toast" role="status"></div>
+<script src="runtime-config.js?v=1"></script>
+<script src="community-page.js?v=1"></script>
+</body>
+</html>
