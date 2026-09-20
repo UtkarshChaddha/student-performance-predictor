@@ -1,6 +1,12 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    field_validator,
+)
 
 
 # ============================================================
@@ -17,6 +23,7 @@ class StrictBaseModel(BaseModel):
     The "role" field will NOT be silently ignored.
     The request is rejected.
     """
+
     model_config = ConfigDict(
         extra="forbid",
         str_strip_whitespace=True,
@@ -29,44 +36,92 @@ class StrictBaseModel(BaseModel):
 
 class RegisterRequest(StrictBaseModel):
     email: EmailStr
-    password: str = Field(min_length=12, max_length=128)
-    name: str = Field(min_length=2, max_length=120)
+    password: str = Field(
+        min_length=12,
+        max_length=128,
+    )
+    name: str = Field(
+        min_length=2,
+        max_length=120,
+    )
 
     @field_validator("email")
     @classmethod
-    def normalize_email(cls, value: EmailStr) -> str:
+    def normalize_email(
+        cls,
+        value: EmailStr,
+    ) -> str:
         return str(value).strip().lower()
 
     @field_validator("password")
     @classmethod
-    def validate_password(cls, value: str) -> str:
+    def validate_password(
+        cls,
+        value: str,
+    ) -> str:
         if value != value.strip():
-            raise ValueError("Password must not begin or end with whitespace")
+            raise ValueError(
+                "Password must not begin or end with whitespace"
+            )
 
         if len(value) < 12:
-            raise ValueError("Password must contain at least 12 characters")
+            raise ValueError(
+                "Password must contain at least 12 characters"
+            )
 
         return value
 
     @field_validator("name")
     @classmethod
-    def validate_name(cls, value: str) -> str:
+    def validate_name(
+        cls,
+        value: str,
+    ) -> str:
         value = value.strip()
 
         if len(value) < 2:
-            raise ValueError("Name must contain at least two characters")
+            raise ValueError(
+                "Name must contain at least two characters"
+            )
 
         return value
 
 
 class LoginRequest(StrictBaseModel):
     email: EmailStr
-    password: str = Field(min_length=1, max_length=128)
+    password: str = Field(
+        min_length=1,
+        max_length=128,
+    )
 
     @field_validator("email")
     @classmethod
-    def normalize_email(cls, value: EmailStr) -> str:
+    def normalize_email(
+        cls,
+        value: EmailStr,
+    ) -> str:
         return str(value).strip().lower()
+
+
+class MistakeCoachRequest(StrictBaseModel):
+    message: str = Field(min_length=3, max_length=2000)
+    subject: str | None = Field(default=None, max_length=120)
+
+
+class LearningQuestionRequest(StrictBaseModel):
+    message: str = Field(min_length=3, max_length=2000)
+    subject: str | None = Field(default=None, max_length=120)
+
+
+class CodingOrchestratorRequest(StrictBaseModel):
+    message: str = Field(min_length=3, max_length=4000)
+    language: str | None = Field(default=None, max_length=40)
+    code: str | None = Field(default=None, max_length=12000)
+
+
+class PracticeAnswerRequest(StrictBaseModel):
+    question_id: str = Field(min_length=3, max_length=80)
+    answer: int = Field(ge=0, le=5)
 
 
 class UserRead(StrictBaseModel):
@@ -78,22 +133,66 @@ class UserRead(StrictBaseModel):
 
 
 # ============================================================
+# Community
+# ============================================================
+
+class CommunityPostCreate(StrictBaseModel):
+    content: str = Field(min_length=1, max_length=500)
+    topic: str = Field(default="discussion", max_length=30)
+
+
+class CommunityCommentCreate(StrictBaseModel):
+    content: str = Field(min_length=1, max_length=180)
+
+
+class CommunityCommentRead(StrictBaseModel):
+    id: int
+    author: str
+    content: str
+    created_at: datetime
+
+
+class CommunityPostRead(StrictBaseModel):
+    id: int
+    author: str
+    initials: str
+    content: str
+    topic: str
+    created_at: datetime
+    likes: int
+    liked: bool
+    comments: list[CommunityCommentRead]
+
+
+# ============================================================
 # Student creation
 # ============================================================
 
 class StudentCreate(StrictBaseModel):
     """
-    Kept for compatibility with the existing student endpoints.
+    Used for admin-created student accounts.
 
     IMPORTANT:
-    There is deliberately NO role field here.
+    Authorization-sensitive fields are deliberately absent.
 
-    Authorization must always be decided by the backend.
+    The client cannot provide:
+        - role
+        - user_id
+        - current_streak
+        - password_hash
     """
 
     email: EmailStr
-    password: str = Field(min_length=12, max_length=128)
-    name: str = Field(min_length=2, max_length=120)
+
+    password: str = Field(
+        min_length=12,
+        max_length=128,
+    )
+
+    name: str = Field(
+        min_length=2,
+        max_length=120,
+    )
 
     course: str | None = Field(
         default=None,
@@ -118,38 +217,53 @@ class StudentCreate(StrictBaseModel):
         le=5,
     )
 
-    current_streak: int = Field(
-        default=0,
-        ge=0,
-        le=10_000,
-    )
-
     @field_validator("email")
     @classmethod
-    def normalize_email(cls, value: EmailStr) -> str:
+    def normalize_email(
+        cls,
+        value: EmailStr,
+    ) -> str:
         return str(value).strip().lower()
 
     @field_validator("password")
     @classmethod
-    def validate_password(cls, value: str) -> str:
+    def validate_password(
+        cls,
+        value: str,
+    ) -> str:
         if value != value.strip():
-            raise ValueError("Password must not begin or end with whitespace")
+            raise ValueError(
+                "Password must not begin or end with whitespace"
+            )
+
+        if len(value) < 12:
+            raise ValueError(
+                "Password must contain at least 12 characters"
+            )
 
         return value
 
     @field_validator("name")
     @classmethod
-    def validate_name(cls, value: str) -> str:
+    def validate_name(
+        cls,
+        value: str,
+    ) -> str:
         value = value.strip()
 
         if len(value) < 2:
-            raise ValueError("Name must contain at least two characters")
+            raise ValueError(
+                "Name must contain at least two characters"
+            )
 
         return value
 
     @field_validator("course")
     @classmethod
-    def normalize_course(cls, value: str | None) -> str | None:
+    def normalize_course(
+        cls,
+        value: str | None,
+    ) -> str | None:
         if value is None:
             return None
 
@@ -166,10 +280,13 @@ class StudentRead(BaseModel):
     """
     Public/API response model.
 
-    Password hashes are intentionally absent.
+    Password hashes and other sensitive internal
+    fields are intentionally absent.
     """
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
 
     id: int
     user_id: int
@@ -184,7 +301,9 @@ class StudentRead(BaseModel):
 
 
 class LegacyStudentRead(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
 
     id: int
     name: str
@@ -202,14 +321,13 @@ class StudentUpdate(StrictBaseModel):
     """
     Used when an authenticated user updates their profile.
 
-    Notice what is NOT here:
-    - user_id
-    - role
-    - password_hash
-    - email ownership
-    - current_streak
+    Client cannot mass-assign:
 
-    Those must not be mass-assigned by the client.
+        - user_id
+        - role
+        - password_hash
+        - email
+        - current_streak
     """
 
     name: str | None = Field(
@@ -243,20 +361,30 @@ class StudentUpdate(StrictBaseModel):
 
     @field_validator("name")
     @classmethod
-    def validate_name(cls, value: str | None) -> str | None:
+    def validate_name(
+        cls,
+        value: str | None,
+    ) -> str | None:
+
         if value is None:
             return None
 
         value = value.strip()
 
         if len(value) < 2:
-            raise ValueError("Name must contain at least two characters")
+            raise ValueError(
+                "Name must contain at least two characters"
+            )
 
         return value
 
     @field_validator("course")
     @classmethod
-    def normalize_course(cls, value: str | None) -> str | None:
+    def normalize_course(
+        cls,
+        value: str | None,
+    ) -> str | None:
+
         if value is None:
             return None
 
@@ -282,17 +410,27 @@ class SubjectCreate(StrictBaseModel):
 
     @field_validator("name")
     @classmethod
-    def normalize_name(cls, value: str) -> str:
+    def normalize_name(
+        cls,
+        value: str,
+    ) -> str:
+
         value = value.strip()
 
         if len(value) < 2:
-            raise ValueError("Subject name must contain at least two characters")
+            raise ValueError(
+                "Subject name must contain at least two characters"
+            )
 
         return value
 
     @field_validator("description")
     @classmethod
-    def normalize_description(cls, value: str | None) -> str | None:
+    def normalize_description(
+        cls,
+        value: str | None,
+    ) -> str | None:
+
         if value is None:
             return None
 
@@ -302,7 +440,9 @@ class SubjectCreate(StrictBaseModel):
 
 
 class SubjectRead(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
 
     id: int
     name: str
@@ -317,8 +457,12 @@ class ProgressUpsert(StrictBaseModel):
     """
     Client may update progress values only.
 
-    Ownership/authorization is handled by the backend,
-    NOT by this schema.
+    Ownership and authorization are handled by the backend.
+
+    The client cannot provide:
+        - student_id
+        - subject_id
+        - last_activity
     """
 
     progress: float = Field(
@@ -338,11 +482,11 @@ class ProgressUpsert(StrictBaseModel):
         le=10_000_000,
     )
 
-    last_activity: datetime | None = None
-
 
 class ProgressRead(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
 
     id: int
     student_id: int
@@ -352,4 +496,3 @@ class ProgressRead(BaseModel):
     average_score: float | None
     questions_solved: int
     last_activity: datetime | None
-

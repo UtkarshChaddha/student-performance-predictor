@@ -1,9 +1,7 @@
 from collections.abc import Generator
 from datetime import datetime, timedelta, timezone
 
-import os
 import secrets
-
 import jwt
 
 from fastapi import (
@@ -36,11 +34,19 @@ from backend.database import (
     User,
     UserRole,
     UserSession,
+    LearningInteraction,
+    CommunityComment,
+    CommunityLike,
+    CommunityPost,
 )
 
 from backend.schemas import (
     LegacyStudentRead,
+    LearningQuestionRequest,
+    CodingOrchestratorRequest,
     LoginRequest,
+    MistakeCoachRequest,
+    PracticeAnswerRequest,
     ProgressRead,
     ProgressUpsert,
     RegisterRequest,
@@ -50,6 +56,10 @@ from backend.schemas import (
     SubjectCreate,
     SubjectRead,
     UserRead,
+    CommunityCommentCreate,
+    CommunityCommentRead,
+    CommunityPostCreate,
+    CommunityPostRead,
 )
 
 from backend.security import (
@@ -57,6 +67,15 @@ from backend.security import (
     hash_password,
     verify_password,
 )
+
+from backend.dqn_service import recommend as dqn_recommend
+from backend.llm_service import (
+    analyze_mistake,
+    answer_learning_question,
+    orchestrate_coding,
+    generate_learning_content,
+)
+from backend.question_bank import QUESTIONS, get_question, public_question
 
 
 # ============================================================
@@ -73,7 +92,6 @@ app = FastAPI(
 # Rate limiting
 # ============================================================
 
-# Limit requests based on the client's IP address.
 limiter = Limiter(
     key_func=get_remote_address
 )
@@ -87,33 +105,82 @@ app.add_exception_handler(
 
 
 # ============================================================
+# Security headers
+# ============================================================
+
+@app.middleware("http")
+async def security_headers(
+    request: Request,
+    call_next,
+):
+    response = await call_next(request)
+
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+
+    response.headers["Referrer-Policy"] = (
+        "strict-origin-when-cross-origin"
+    )
+
+    response.headers["Permissions-Policy"] = (
+        "camera=(), "
+        "microphone=(), "
+        "geolocation=(), "
+        "payment=(), "
+        "usb=()"
+    )
+
+    response.headers["Cache-Control"] = "no-store"
+
+    # Swagger UI needs CDN assets and inline configuration.
+    # Keep the relaxed CSP limited to the API documentation pages.
+    if request.url.path in {"/docs", "/redoc"}:
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "base-uri 'self'; "
+            "object-src 'none'; "
+            "frame-ancestors 'none'; "
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "img-src 'self' data: https://fastapi.tiangolo.com; "
+            "font-src 'self' data: https://cdn.jsdelivr.net; "
+            "connect-src 'self'"
+        )
+    else:
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "base-uri 'self'; "
+            "object-src 'none'; "
+            "frame-ancestors 'none'; "
+            "script-src 'self'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data:; "
+            "font-src 'self' data:; "
+            "connect-src 'self'"
+        )
+
+    if settings.cookie_secure:
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
+
+    return response
+
+
+# ============================================================
 # CORS
 # ============================================================
 
-# Never use "*" with credentialed authentication.
-#
-# Change this environment variable when deploying:
-#
-# FRONTEND_ORIGIN=https://your-domain.com
-#
-# For local development we allow common localhost ports.
-
-frontend_origin = os.getenv(
-    "FRONTEND_ORIGIN",
-    "http://127.0.0.1:5500",
-)
-
-allowed_origins = {
-    frontend_origin,
-    "http://localhost:5500",
-    "http://127.0.0.1:5500",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-}
+configured_origin = settings.frontend_origin.rstrip("/")
+origin_variants = [configured_origin]
+if "localhost" in configured_origin:
+    origin_variants.append(configured_origin.replace("localhost", "127.0.0.1"))
+elif "127.0.0.1" in configured_origin:
+    origin_variants.append(configured_origin.replace("127.0.0.1", "localhost"))
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=list(allowed_origins),
+    allow_origins=origin_variants,
     allow_credentials=True,
     allow_methods=[
         "GET",
@@ -139,7 +206,6 @@ SESSION_COOKIE = "adhyan_session"
 CSRF_COOKIE = "adhyan_csrf"
 
 SESSION_DURATION = timedelta(hours=12)
-LONG_SESSION_DURATION = timedelta(days=30)
 
 COOKIE_SAMESITE = "lax"
 
@@ -165,16 +231,10 @@ def create_session_token(
     user: User,
     duration: timedelta,
 ) -> tuple[str, str, datetime]:
-    """
-    Create a signed authentication token.
-
-    The JTI uniquely identifies this login session.
-    The JTI is stored in the database so the session
-    can later be revoked during logout.
-    """
 
     now = datetime.now(timezone.utc)
     expires_at = now + duration
+
     jti = secrets.token_hex(16)
 
     payload = {
@@ -196,14 +256,6 @@ def create_session_token(
 def decode_session_token(
     token: str,
 ) -> tuple[int, str, datetime]:
-    """
-    Decode and validate the authentication token.
-
-    Returns:
-        user_id
-        jti
-        expiration time
-    """
 
     try:
         payload = jwt.decode(
@@ -268,12 +320,6 @@ def get_current_user(
     ),
     db: Session = Depends(get_db),
 ) -> User:
-    """
-    Authenticate the request.
-
-    The JWT proves the token was signed by Adhyan.
-    The database confirms that the session is still active.
-    """
 
     if not session_token:
         raise HTTPException(
@@ -301,7 +347,14 @@ def get_current_user(
 
     now = datetime.now(timezone.utc)
 
-    if session.expires_at <= now:
+    expires_at = session.expires_at
+
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(
+            tzinfo=timezone.utc
+        )
+
+    if expires_at <= now:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication required",
@@ -328,11 +381,6 @@ def get_current_user(
 def require_roles(
     *allowed_roles: UserRole,
 ):
-    """
-    Create a dependency requiring one of
-    the specified roles.
-    """
-
     def dependency(
         current_user: User = Depends(
             get_current_user
@@ -367,15 +415,12 @@ def require_student_owner(
             detail="Student not found",
         )
 
-    # Admin can access everything.
-    if current_user.role == UserRole.ADMIN:
+    if current_user.role in {
+        UserRole.ADMIN,
+        UserRole.TRAINER,
+    }:
         return profile
 
-    # Trainers may access student records.
-    if current_user.role == UserRole.TRAINER:
-        return profile
-
-    # Trainees can ONLY access their own profile.
     if profile.user_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -391,16 +436,9 @@ def require_student_owner(
 
 def verify_csrf(
     request: Request,
-    csrf_cookie: str | None = Cookie(
-        default=None,
-        alias=CSRF_COOKIE,
-    ),
+    csrf_cookie: str | None = None,
 ) -> None:
-    """
-    Double-submit CSRF protection.
-    """
 
-    # Safe methods do not modify state.
     if request.method in {
         "GET",
         "HEAD",
@@ -412,6 +450,20 @@ def verify_csrf(
         "X-CSRF-Token"
     )
 
+    # IMPORTANT:
+    # When this function is used as a FastAPI dependency,
+    # FastAPI can inject the cookie value.
+    #
+    # When called manually, such as:
+    #     verify_csrf(request)
+    #
+    # there is no dependency injection, so we explicitly
+    # retrieve the raw cookie string from the request.
+    if csrf_cookie is None:
+        csrf_cookie = request.cookies.get(
+            CSRF_COOKIE
+        )
+
     if not csrf_cookie or not csrf_header:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -419,13 +471,38 @@ def verify_csrf(
         )
 
     if not secrets.compare_digest(
-        csrf_cookie,
-        csrf_header,
+        str(csrf_cookie),
+        str(csrf_header),
     ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="CSRF validation failed",
         )
+
+
+def community_post_response(
+    post: CommunityPost,
+    current_user: User,
+) -> CommunityPostRead:
+    return CommunityPostRead(
+        id=post.id,
+        author=post.author.name,
+        initials="".join(part[0] for part in post.author.name.split())[:2].upper(),
+        content=post.content,
+        topic=post.topic,
+        created_at=post.created_at,
+        likes=len(post.likes),
+        liked=any(like.user_id == current_user.id for like in post.likes),
+        comments=[
+            CommunityCommentRead(
+                id=comment.id,
+                author=comment.author.name,
+                content=comment.content,
+                created_at=comment.created_at,
+            )
+            for comment in post.comments
+        ],
+    )
 
 
 # ============================================================
@@ -636,13 +713,9 @@ def login(
         )
     )
 
-    # IMPORTANT:
-    # Do not reveal whether an email exists.
-    #
-    # We still perform password hashing work
-    # when the user does not exist.
-
     if not user:
+        # Perform a dummy hash operation to reduce the
+        # timing difference between unknown and known users.
         hash_password(
             login_data.password
         )
@@ -661,11 +734,11 @@ def login(
             detail="Invalid email or password",
         )
 
-    duration = SESSION_DURATION
-
-    session_token, jti, expires_at = create_session_token(
-        user,
-        duration,
+    session_token, jti, expires_at = (
+        create_session_token(
+            user,
+            SESSION_DURATION,
+        )
     )
 
     user_session = UserSession(
@@ -693,10 +766,10 @@ def login(
         key=SESSION_COOKIE,
         value=session_token,
         httponly=True,
-        secure=False,
+        secure=settings.cookie_secure,
         samesite=COOKIE_SAMESITE,
         max_age=int(
-            duration.total_seconds()
+            SESSION_DURATION.total_seconds()
         ),
         path="/",
     )
@@ -705,10 +778,10 @@ def login(
         key=CSRF_COOKIE,
         value=csrf_token,
         httponly=False,
-        secure=False,
+        secure=settings.cookie_secure,
         samesite=COOKIE_SAMESITE,
         max_age=int(
-            duration.total_seconds()
+            SESSION_DURATION.total_seconds()
         ),
         path="/",
     )
@@ -769,15 +842,13 @@ def logout(
                 user_session
                 and user_session.revoked_at is None
             ):
-                user_session.revoked_at = datetime.now(
-                    timezone.utc
+                user_session.revoked_at = (
+                    datetime.now(timezone.utc)
                 )
 
                 db.commit()
 
         except HTTPException:
-            # Even if the token is already invalid,
-            # still clear the browser cookies.
             pass
 
     response.delete_cookie(
@@ -796,6 +867,78 @@ def logout(
 
 
 # ============================================================
+# Community
+# ============================================================
+
+@app.get("/api/community/posts", response_model=list[CommunityPostRead])
+def list_community_posts(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> list[CommunityPostRead]:
+    posts = db.scalars(
+        select(CommunityPost).order_by(CommunityPost.created_at.desc()).limit(50)
+    ).all()
+    return [community_post_response(post, current_user) for post in posts]
+
+
+@app.post("/api/community/posts", response_model=CommunityPostRead)
+def create_community_post(
+    post_data: CommunityPostCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    _: None = Depends(verify_csrf),
+) -> CommunityPostRead:
+    topic = post_data.topic.lower()
+    if topic not in {"discussion", "question", "win"}:
+        topic = "discussion"
+    post = CommunityPost(author_id=current_user.id, content=post_data.content, topic=topic)
+    db.add(post)
+    db.commit()
+    db.refresh(post)
+    return community_post_response(post, current_user)
+
+
+@app.post("/api/community/posts/{post_id}/like", response_model=CommunityPostRead)
+def toggle_community_like(
+    post_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    _: None = Depends(verify_csrf),
+) -> CommunityPostRead:
+    post = db.get(CommunityPost, post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    like = db.scalar(select(CommunityLike).where(
+        CommunityLike.post_id == post_id,
+        CommunityLike.user_id == current_user.id,
+    ))
+    if like:
+        db.delete(like)
+    else:
+        db.add(CommunityLike(post_id=post_id, user_id=current_user.id))
+    db.commit()
+    db.refresh(post)
+    return community_post_response(post, current_user)
+
+
+@app.post("/api/community/posts/{post_id}/comments", response_model=CommunityPostRead)
+def add_community_comment(
+    post_id: int,
+    comment_data: CommunityCommentCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    _: None = Depends(verify_csrf),
+) -> CommunityPostRead:
+    post = db.get(CommunityPost, post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    db.add(CommunityComment(post_id=post_id, author_id=current_user.id, content=comment_data.content))
+    db.commit()
+    db.refresh(post)
+    return community_post_response(post, current_user)
+
+
+# ============================================================
 # Students
 # ============================================================
 
@@ -809,9 +952,6 @@ def list_students(
     ),
     db: Session = Depends(get_db),
 ) -> list[StudentRead]:
-
-    # Trainees should never receive
-    # the entire student database.
 
     if current_user.role == UserRole.TRAINEE:
 
@@ -1041,7 +1181,6 @@ def create_or_update_progress(
         progress.questions_solved
     )
 
-    # Server controls activity timestamps.
     record.last_activity = (
         datetime.now(timezone.utc)
     )
@@ -1085,6 +1224,352 @@ def retrieve_student_progress(
         progress_response(record)
         for record in records
     ]
+
+
+# ============================================================
+# ADAPTIVE RECOMMENDATION
+# ============================================================
+
+@app.post("/api/recommend")
+@limiter.limit("20/minute")
+async def get_recommendation(
+    request: Request,
+    current_user: User = Depends(
+        get_current_user
+    ),
+    db: Session = Depends(get_db),
+):
+    # Manual verification is now safe because verify_csrf()
+    # reads request.cookies when no injected cookie is supplied.
+    verify_csrf(request)
+
+    # --------------------------------------------------------
+    # Get authenticated student's profile
+    # --------------------------------------------------------
+
+    student = db.scalar(
+        select(StudentProfile).where(
+            StudentProfile.user_id == current_user.id
+        )
+    )
+
+    if student is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Student profile not found.",
+        )
+
+    # --------------------------------------------------------
+    # Find student's progress
+    # --------------------------------------------------------
+
+    progress_records = db.scalars(
+        select(StudentProgress)
+        .where(
+            StudentProgress.student_id == student.id
+        )
+        .order_by(
+            StudentProgress.last_activity.desc()
+        )
+    ).all()
+
+    # --------------------------------------------------------
+    # Choose subject
+    # --------------------------------------------------------
+
+    if progress_records:
+        progress = min(
+            progress_records,
+            key=lambda item: item.progress,
+        )
+
+        subject = progress.subject
+
+    else:
+        subject = db.scalar(
+            select(Subject)
+            .order_by(Subject.id)
+        )
+
+        progress = None
+
+    if subject is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No learning subjects are available.",
+        )
+
+    # --------------------------------------------------------
+    # Build learner state
+    # --------------------------------------------------------
+
+    if progress:
+
+        accuracy = (
+            progress.average_score / 100.0
+            if progress.average_score is not None
+            else 0.0
+        )
+
+        attempts = progress.questions_solved
+
+        mastery = progress.progress / 100.0
+
+        time_taken = 0.0
+
+    else:
+
+        accuracy = 0.0
+        attempts = 0
+        mastery = 0.0
+        time_taken = 0.0
+
+    # --------------------------------------------------------
+    # DQN
+    # --------------------------------------------------------
+
+    try:
+        dqn_result = dqn_recommend(
+            accuracy=accuracy,
+            attempts=attempts,
+            time_taken=time_taken,
+            mastery=mastery,
+        )
+
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Adaptive engine is temporarily unavailable.",
+        )
+
+    except (
+        RuntimeError,
+        ValueError,
+        TypeError,
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Adaptive engine could not process the learner state.",
+        )
+
+    action = dqn_result["action"]
+
+    # --------------------------------------------------------
+    # Topic
+    # --------------------------------------------------------
+
+    topic = subject.name
+
+    # --------------------------------------------------------
+    # Difficulty
+    # --------------------------------------------------------
+
+    if mastery < 0.35:
+        difficulty = "Beginner"
+
+    elif mastery < 0.70:
+        difficulty = "Intermediate"
+
+    else:
+        difficulty = "Advanced"
+
+    # --------------------------------------------------------
+    # LLM
+    # --------------------------------------------------------
+
+    try:
+        llm_result = await generate_learning_content(
+            subject=subject.name,
+            topic=topic,
+            action=action,
+            difficulty=difficulty,
+        )
+
+    except Exception:
+        # The adaptive engine should not crash if the external
+        # LLM provider is temporarily unavailable.
+        llm_result = {
+            "available": False,
+            "content": (
+                f"Adhyan recommends {action.lower()} "
+                f"for {topic}. "
+                "Learning content is temporarily unavailable."
+            ),
+            "prompt": None,
+        }
+
+    # --------------------------------------------------------
+    # Save recommendation interaction
+    # --------------------------------------------------------
+
+    interaction = LearningInteraction(
+        student_id=student.id,
+        subject_id=subject.id,
+        topic=topic,
+        action=action,
+        correctness=None,
+        attempts=attempts,
+        time_taken=None,
+        reward=None,
+    )
+
+    db.add(interaction)
+
+    try:
+        db.commit()
+        db.refresh(interaction)
+
+    except IntegrityError:
+        db.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Could not save learning interaction.",
+        )
+
+    # --------------------------------------------------------
+    # Response
+    # --------------------------------------------------------
+
+    return {
+        "success": True,
+
+        "subject": {
+            "id": subject.id,
+            "name": subject.name,
+        },
+
+        "topic": topic,
+
+        "difficulty": difficulty,
+
+        "action": action,
+
+        "action_index": dqn_result["action_index"],
+
+        "q_values": dqn_result["q_values"],
+
+        "state": dqn_result["state"],
+
+        "content": llm_result["content"],
+
+        "llm_available": llm_result["available"],
+
+        "interaction_id": interaction.id,
+    }
+
+
+@app.post("/api/coach/mistake")
+@limiter.limit("20/minute")
+async def coach_mistake(
+    request: Request,
+    message: MistakeCoachRequest,
+    _: User = Depends(get_current_user),
+):
+    verify_csrf(request)
+    result = await analyze_mistake(message.message, message.subject)
+    return {
+        "success": True,
+        "content": result["content"],
+        "llm_available": result["available"],
+        "source": result.get("source", "llm" if result["available"] else "offline_dataset"),
+    }
+
+
+@app.post("/api/coach/ask")
+@limiter.limit("20/minute")
+async def ask_learning_question(
+    request: Request,
+    message: LearningQuestionRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    verify_csrf(request)
+    profile = db.scalar(
+        select(StudentProfile).where(StudentProfile.user_id == current_user.id)
+    )
+    context = "No learner profile context is available."
+    if profile is not None:
+        progress = db.scalars(
+            select(StudentProgress)
+            .where(StudentProgress.student_id == profile.id)
+            .order_by(StudentProgress.progress.asc())
+            .limit(5)
+        ).all()
+        context = "; ".join(
+            f"{item.subject.name}: {item.progress:.0f}% progress, "
+            f"{item.average_score or 0:.0f}% average"
+            for item in progress
+        ) or context
+    result = await answer_learning_question(
+        message=message.message,
+        subject=message.subject,
+        learner_context=context,
+    )
+    return {
+        "success": True,
+        "content": result["content"],
+        "llm_available": result["available"],
+        "source": result.get("source", "llm" if result["available"] else "offline_dataset"),
+    }
+
+
+@app.post("/api/coach/code")
+@limiter.limit("20/minute")
+async def orchestrate_code(
+    request: Request,
+    message: CodingOrchestratorRequest,
+    _: User = Depends(get_current_user),
+):
+    verify_csrf(request)
+    result = await orchestrate_coding(
+        message=message.message,
+        language=message.language,
+        code=message.code,
+    )
+    return {
+        "success": True,
+        "intent": result["intent"],
+        "content": result["content"],
+        "llm_available": result["available"],
+        "source": result["source"],
+    }
+
+
+@app.get("/api/practice/questions")
+def practice_questions(
+    subject: str | None = None,
+    limit: int = 20,
+    _: User = Depends(get_current_user),
+):
+    bounded_limit = min(max(limit, 1), 100)
+    questions = [
+        question for question in QUESTIONS
+        if not subject or question["subject"].lower() == subject.lower()
+    ]
+    return {
+        "count": min(len(questions), bounded_limit),
+        "total_available": len(questions),
+        "questions": [public_question(question) for question in questions[:bounded_limit]],
+    }
+
+
+@app.post("/api/practice/answer")
+@limiter.limit("60/minute")
+def practice_answer(
+    request: Request,
+    answer: PracticeAnswerRequest,
+    _: User = Depends(get_current_user),
+):
+    verify_csrf(request)
+    question = get_question(answer.question_id)
+    if question is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Practice question not found.")
+    return {
+        "correct": answer.answer == question["answer"],
+        "correct_answer": question["answer"],
+        "explanation": question["explanation"],
+    }
 
 
 # ============================================================
@@ -1166,8 +1651,6 @@ def get_dashboard(
     db: Session = Depends(get_db),
 ) -> dict:
 
-    # A trainee gets ONLY their own information.
-
     if current_user.role == UserRole.TRAINEE:
 
         profile = current_user.student_profile
@@ -1235,7 +1718,9 @@ def get_dashboard(
 # Delete student
 # ============================================================
 
-@app.delete("/students/{student_id}")
+@app.delete(
+    "/students/{student_id}"
+)
 def delete_student(
     student_id: int,
     current_user: User = Depends(
